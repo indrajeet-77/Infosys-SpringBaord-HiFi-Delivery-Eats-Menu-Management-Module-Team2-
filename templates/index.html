@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Menu Management System</h1>
+    </header>
+    <main>
+        <aside id="filters">
+            <h2>Filters</h2>
+            <div id="category-filters" class="filter-section">
+                <h3>Categories</h3>
+                <!-- Category checkboxes will be dynamically inserted here -->
+            </div>
+            <div id="dietary-preference-filters" class="filter-section">
+                <h3>Dietary Preferences</h3>
+                <!-- Dietary preference checkboxes will be dynamically inserted here -->
+            </div>
+            <button id="apply-filters">Apply Filters</button>
+        </aside>
+        <section id="menu-items">
+            <div id="menu-controls">
+                <input type="text" id="search-input" placeholder="Search menu items...">
+                <select id="sort-select">
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-asc">Price (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                </select>
+            </div>
+            <div id="menu-items-container">
+                <!-- Menu items will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
