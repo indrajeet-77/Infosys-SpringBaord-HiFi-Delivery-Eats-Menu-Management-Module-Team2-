@@ -44,7 +44,9 @@ def get_categories():
     categories = cursor.fetchall()
     conn.close()
     return jsonify([dict(category) for category in categories])
-
+@app.route('/admin')
+def admin():
+    return render_template("adminpanel.html")
 @app.route('/api/dietary_preferences', methods=['GET'])
 def get_dietary_preferences():
     conn = get_db_connection()
