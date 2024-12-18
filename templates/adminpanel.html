@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background-color: #ffe8d6; /* Light peach background color */
+            background-color: #ffe8d6;
         }
     </style>
 </head>
@@ -15,7 +15,7 @@
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center text-pink-500 mb-6">Menu Management Admin Panel</h1>
         
-        <!-- Form Section -->
+        <!-- Form Section (Unchanged from previous version) -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold text-pink-500 mb-4">Add or Edit Menu Item</h2>
             <form id="menuItemForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -84,6 +84,9 @@
     </div>
 
     <script>
+        // Global variables
+        let currentEditId = null;
+
         // Fetch and populate categories in the dropdown
         async function loadCategories() {
             try {
@@ -140,13 +143,99 @@
             }
         }
 
-        // Initialize the page
-        function initializePage() {
-            loadCategories(); // Load categories first
-            loadMenuItems(); // Load menu items
+        // Edit menu item
+        async function editMenuItem(id) {
+            try {
+                const response = await fetch('/api/menu_items');
+                const menuItems = await response.json();
+                const item = menuItems.find(item => item.MenuItemID === id);
+                
+                if (item) {
+                    currentEditId = id;
+                    document.getElementById('menuItemId').value = id;
+                    document.getElementById('name').value = item.Name;
+                    document.getElementById('description').value = item.Description;
+                    document.getElementById('price').value = item.Price;
+                    document.getElementById('category').value = item.CategoryID;
+                    document.getElementById('imageUrl').value = item.ImageURL;
+                    document.getElementById('availabilityStatus').checked = item.AvailabilityStatus === 1;
+                    
+                    document.getElementById('saveButton').textContent = 'Update Menu Item';
+                }
+            } catch (error) {
+                console.error('Error editing menu item:', error);
+                alert('Failed to edit menu item');
+            }
         }
 
-        initializePage();
+        // Delete menu item
+        async function deleteMenuItem(id) {
+            try {
+                const response = await fetch(`/api/menu_items/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadMenuItems();
+                    alert('Menu item deleted successfully');
+                } else {
+                    throw new Error('Failed to delete');
+                }
+            } catch (error) {
+                console.error('Error deleting menu item:', error);
+                alert('Failed to delete menu item');
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('menuItemForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const formData = {
+                MenuItemID: currentEditId,
+                Name: document.getElementById('name').value,
+                Description: document.getElementById('description').value,
+                Price: parseFloat(document.getElementById('price').value),
+                CategoryID: parseInt(document.getElementById('category').value),
+                ImageURL: document.getElementById('imageUrl').value,
+                AvailabilityStatus: document.getElementById('availabilityStatus').checked ? 1 : 0
+            };
+
+            try {
+                const response = await fetch('/api/menu_items', {
+                    method: currentEditId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    loadMenuItems();
+                    alert(`Menu item ${currentEditId ? 'updated' : 'added'} successfully`);
+                    clearForm();
+                } else {
+                    throw new Error('Failed to save');
+                }
+            } catch (error) {
+                console.error('Error saving menu item:', error);
+                alert('Failed to save menu item');
+            }
+        });
+
+        // Clear form
+        function clearForm() {
+            currentEditId = null;
+            document.getElementById('menuItemForm').reset();
+            document.getElementById('saveButton').textContent = 'Save Menu Item';
+        }
+
+        // Clear form on button click
+        document.getElementById('clearButton').addEventListener('click', clearForm);
+
+        // Initialize data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadMenuItems();
+        });
     </script>
 </body>
 </html>
