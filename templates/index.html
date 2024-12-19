@@ -6,12 +6,18 @@
     <title>Menu Management System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .fixed-bottom-right {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
     <header class="flex justify-between items-center p-4 bg-white shadow-md">
         <h1>Menu Management System</h1>
-        
-      
     </header>
 
     <main class="flex">
@@ -44,6 +50,9 @@
             </div>
         </section>
     </main>
+
+    <!-- Button to go to Admin Panel -->
+    <button onclick="location.href='/admin'" class="fixed-bottom-right px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Go to Admin Panel</button>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
