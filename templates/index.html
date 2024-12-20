@@ -6,6 +6,8 @@
     <title>Menu Management System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 </head>
 <body>
     <header class="flex justify-between items-center p-4 bg-white shadow-md">
@@ -44,6 +46,10 @@
             </div>
         </section>
     </main>
+    <button onclick="location.href='/admin'" class="admin-button">
+        <i class="fas fa-user-shield"></i>
+        Go to Admin Panel
+    </button>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

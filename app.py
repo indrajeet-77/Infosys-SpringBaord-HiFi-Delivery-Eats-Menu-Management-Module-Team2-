@@ -85,47 +85,60 @@ def menu_items():
         finally:
             conn.close()
 
-@app.route('/api/menu_items/<int:item_id>', methods=['PUT', 'DELETE'])
+# Update existing menu item
+@app.route('/api/menu_items', methods=['PUT'])
+def update_menu_item():
+    try:
+        data = request.json
+        menu_item_id = data.get('MenuItemID')
+
+        if not menu_item_id:
+            return jsonify({"error": "MenuItemID is required"}), 400
+
+        # Database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Update query
+        cursor.execute('''
+            UPDATE MenuItems
+            SET Name = ?, Description = ?, Price = ?, CategoryID = ?, ImageURL = ?, AvailabilityStatus = ?, ModifiedDate = CURRENT_TIMESTAMP
+            WHERE MenuItemID = ?
+        ''', (
+            data.get('Name'),
+            data.get('Description'),
+            data.get('Price'),
+            data.get('CategoryID'),
+            data.get('ImageURL'),
+            data.get('AvailabilityStatus'),
+            menu_item_id
+        ))
+
+
+        conn.commit()
+        conn.close()
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "No menu item found with the given ID"}), 404
+
+        return jsonify({"message": "Menu item updated successfully"}), 200
+
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error: {e}")
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+
+
+
+# @app.route('/api/menu_items/<int:item_id>', methods=['PUT', 'DELETE'])
+@app.route('/api/menu_items/<int:item_id>', methods=['DELETE'])
 def modify_menu_item(item_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    if request.method == 'PUT':
-        # Update existing menu item
-        data = request.json
-        try:
-            cursor.execute('''
-                UPDATE MenuItems 
-                SET Name=?, Description=?, Price=?, CategoryID=?, 
-                    AvailabilityStatus=?, ImageURL=? 
-                WHERE MenuItemID=?
-            ''', (
-                data['Name'], 
-                data['Description'], 
-                float(data['Price']), 
-                int(data['CategoryID']), 
-                data.get('AvailabilityStatus', 1),
-                data.get('ImageURL', ''),
-                item_id
-            ))
-
-            cursor.execute('DELETE FROM MenuItemDietaryPreferences WHERE MenuItemID=?', (item_id,))
-
-            if 'DietaryPreferences' in data and data['DietaryPreferences']:
-                cursor.executemany('''
-                    INSERT INTO MenuItemDietaryPreferences (MenuItemID, PreferenceID) 
-                    VALUES (?, ?)
-                ''', [(item_id, pref_id) for pref_id in data['DietaryPreferences']])
-
-            conn.commit()
-            return jsonify({"message": "Menu item updated successfully"}), 200
-        except Exception as e:
-            conn.rollback()
-            return jsonify({"error": str(e)}), 400
-        finally:
-            conn.close()
-
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         # Delete menu item
         try:
             cursor.execute('DELETE FROM MenuItemDietaryPreferences WHERE MenuItemID=?', (item_id,))
