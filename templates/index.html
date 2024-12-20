@@ -6,8 +6,26 @@
     <title>Menu Management System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .fixed-bottom-right {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo"> <img src="..\static\images\Hifi_logo.png"></div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="#filters">Filters</a></li>
+            <li><a href="#menu-items">Menu</a></li>
+            <li><a href="/">Profile</a></li>
+        </ul>
+    </nav>
     <header class="flex justify-between items-center p-4 bg-white shadow-md">
         <h1>Menu Management System</h1>
     </header>
@@ -42,6 +60,8 @@
             </div>
         </section>
     </main>
+
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
