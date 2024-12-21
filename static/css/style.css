@@ -6,6 +6,16 @@ body {
   background-color: #f4f4f4;
   color: #333;
 }
+/* Navbar2 */
+.navbar2{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FFD3D3;
+  padding: 10px 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+}
 /* Navbar */
 .navbar {
   display: flex;
@@ -16,6 +26,18 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.navbar2 .logo img {
+  height: 4rem;
+}
+.navbar2 .heading {
+  flex: 2; /* Center-align the heading */
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding-left: 250px;
+  border: 1px solid black;
+  
+}
 .navbar .logo img {
   height: 4rem;
 }
