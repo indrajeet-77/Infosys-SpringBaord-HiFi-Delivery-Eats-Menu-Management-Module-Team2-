@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 import sqlite3
 import os
+from fpdf import FPDF
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'static/uploads'
@@ -114,7 +115,6 @@ def update_menu_item():
             menu_item_id
         ))
 
-
         conn.commit()
         conn.close()
 
@@ -128,11 +128,7 @@ def update_menu_item():
         print(f"Error: {e}")
         return jsonify({"error": "An internal error occurred"}), 500
 
-
-
-
-
-# @app.route('/api/menu_items/<int:item_id>', methods=['PUT', 'DELETE'])
+# Delete menu item
 @app.route('/api/menu_items/<int:item_id>', methods=['DELETE'])
 def modify_menu_item(item_id):
     conn = get_db_connection()
@@ -176,6 +172,70 @@ def get_dietary_preferences():
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
+
+#Export pdf
+@app.route('/api/export_menu_items', methods=['GET'])
+def export_menu_items():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('''
+            SELECT 
+                mi.Name, 
+                mi.Description, 
+                mi.Price, 
+                mi.ImageURL,
+                c.CategoryName
+            FROM MenuItems mi
+            LEFT JOIN Category c ON mi.CategoryID = c.CategoryID
+        ''')
+        menu_items = cursor.fetchall()
+
+        # Create PDF
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+
+        pdf.cell(200, 10, txt="Menu Items", ln=True, align='C')
+        pdf.ln(10)
+
+        for item in menu_items:
+            pdf.set_font("Arial", 'B', size=12)
+            pdf.cell(0, 10, f"Name: {item['Name']}", 0, 1)
+            pdf.set_font("Arial", size=12)
+            pdf.cell(0, 10, f"Description: {item['Description']}", 0, 1)
+            pdf.cell(0, 10, f"Price: ${item['Price']:.2f}", 0, 1)
+            pdf.cell(0, 10, f"Category: {item['CategoryName']}", 0, 1)
+            
+            """Add Image
+            image_path = item['ImageURL']
+            if image_path:
+                # Construct the absolute path to the image
+                absolute_image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_path.lstrip('/'))
+                print(f"Checking image path: {absolute_image_path}")  # Debugging line
+                if os.path.exists(absolute_image_path):
+                    pdf.cell(0, 10, 'Image:', 0, 1)
+                    pdf.image(absolute_image_path, x=10, y=None, w=50, h=30)  # Adjust image size and position as needed
+                else:
+                    pdf.cell(0, 10, 'Image: N/A', 0, 1)
+                    print(f"Image not found: {absolute_image_path}")  # Log missing or invalid images
+            else:
+                pdf.cell(0, 10, 'Image: N/A', 0, 1)
+            """
+
+            pdf.ln(5)
+
+        # Save PDF to a temporary file
+        pdf_file_path = 'static/uploads/menu_items.pdf'
+        pdf.output(pdf_file_path)
+
+        return send_file(pdf_file_path, as_attachment=True)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
