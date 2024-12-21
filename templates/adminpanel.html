@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,34 +12,44 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center text-pink-500 mb-6">Menu Management Admin Panel</h1>
         
+  
+        <!-- Export Button -->
+        <div class="flex justify-end">
+            <button id="exportButton" 
+                class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
+                Export
+            </button>
+        </div>
+
         <!-- Form Section (Unchanged from previous version) -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold text-pink-500 mb-4">Add or Edit Menu Item</h2>
             <form id="menuItemForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <input type="hidden" id="menuItemId" name="menuItemId">
-                
+
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Item Name</label>
-                    <input type="text" id="name" name="name" required 
+                    <input type="text" id="name" name="name" required
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50">
                 </div>
-                
+
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea id="description" name="description" 
+                    <textarea id="description" name="description"
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50"></textarea>
                 </div>
-                
+
                 <div>
                     <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
                     <input type="number" id="price" name="price" step="0.01" min="0" required
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50">
                 </div>
-                
+
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
                     <select id="category" name="category" required
@@ -46,30 +57,31 @@
                         <option value="" disabled selected>Select a category</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label for="imageUrl" class="block text-sm font-medium text-gray-700">Image URL</label>
-                    <input type="text" id="imageUrl" name="imageUrl" 
+                    <input type="text" id="imageUrl" name="imageUrl"
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-pink-500 focus:ring focus:ring-pink-500 focus:ring-opacity-50">
                 </div>
-                
+
                 <div class="col-span-full">
                     <label class="inline-flex items-center">
-                        <input type="checkbox" id="availabilityStatus" name="availabilityStatus" 
+                        <input type="checkbox" id="availabilityStatus" name="availabilityStatus"
                             class="rounded border-gray-300 text-pink-500 shadow-sm focus:ring focus:ring-pink-500 focus:ring-opacity-50">
                         <span class="ml-2 text-gray-700">Available</span>
                     </label>
                 </div>
-                
+
                 <div class="col-span-full flex space-x-4">
-                    <button type="submit" id="saveButton" 
+                    <button type="submit" id="saveButton"
                         class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
                         Save Menu Item
                     </button>
-                    <button type="button" id="clearButton" 
+                    <button type="button" id="clearButton"
                         class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                         Clear Form
                     </button>
+
                 </div>
             </form>
         </div>
@@ -93,10 +105,10 @@
                 const response = await fetch('/api/categories');
                 const categories = await response.json();
                 const categorySelect = document.getElementById('category');
-                
+
                 // Clear existing options
                 categorySelect.innerHTML = '<option value="" disabled selected>Select a category</option>';
-                
+
                 categories.forEach(category => {
                     const option = document.createElement('option');
                     option.value = category.CategoryID;
@@ -142,14 +154,14 @@
                 alert('Failed to load menu items');
             }
         }
-
+        
         // Edit menu item
         async function editMenuItem(id) {
             try {
                 const response = await fetch('/api/menu_items');
                 const menuItems = await response.json();
                 const item = menuItems.find(item => item.MenuItemID === id);
-                
+
                 if (item) {
                     currentEditId = id;
                     document.getElementById('menuItemId').value = id;
@@ -159,7 +171,7 @@
                     document.getElementById('category').value = item.CategoryID;
                     document.getElementById('imageUrl').value = item.ImageURL;
                     document.getElementById('availabilityStatus').checked = item.AvailabilityStatus === 1;
-                    
+
                     document.getElementById('saveButton').textContent = 'Update Menu Item';
                 }
             } catch (error) {
@@ -174,7 +186,7 @@
                 const response = await fetch(`/api/menu_items/${id}`, {
                     method: 'DELETE'
                 });
-                
+
                 if (response.ok) {
                     loadMenuItems();
                     alert('Menu item deleted successfully');
@@ -236,6 +248,38 @@
             loadCategories();
             loadMenuItems();
         });
+
+
+       // Export menu items as PDF
+    document.getElementById('exportButton').addEventListener('click', async function () {
+    try {
+        const response = await fetch('/api/export_menu_items', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'menu_items.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            throw new Error('Failed to export menu items');
+        }
+    } catch (error) {
+        console.error('Error exporting menu items:', error);
+        alert('Failed to export menu items');
+    }
+});
+
+
     </script>
 </body>
+
 </html>
